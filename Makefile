@@ -21,7 +21,7 @@ all: $(MSORT_BIN) $(MCOMPRESS_BIN) $(MLS_BIN)
 
 asan: $(MSORT_ASAN_BIN) $(MCOMPRESS_ASAN_BIN) $(MLS_ASAN_BIN)
 
-test: $(MSORT_BIN) $(MCOMPRESS_BIN)
+test: $(MSORT_BIN) $(MCOMPRESS_BIN) $(MLS_BIN)
 	$(PYTHON) -m unittest discover -s tests -p "test_*.py" -v
 
 $(BUILD_DIR):

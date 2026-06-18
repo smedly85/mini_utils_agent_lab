@@ -55,4 +55,5 @@ jobs:
         run: |
           cp build/msort_asan build/msort
           cp build/mcompress_asan build/mcompress
+          cp build/mls_asan build/mls
           make test
