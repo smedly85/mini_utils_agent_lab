@@ -54,4 +54,5 @@ jobs:
       - name: Run tests with sanitizers
         run: |
           cp build/msort_asan build/msort
+          cp build/mcompress_asan build/mcompress
           make test
