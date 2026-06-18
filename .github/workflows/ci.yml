@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Configure Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.9.6"
+
+      - name: Display C compiler version
+        run: cc --version
+
+      - name: Display Python version
+        run: python --version
+
+      - name: Clean build outputs
+        run: make clean
+
+      - name: Build
+        run: make
+
+      - name: Run tests
+        run: make test
+
+      - name: Build with sanitizers
+        run: make asan
+
+      - name: Run tests with sanitizers
+        run: |
+          cp build/msort_asan build/msort
+          make test
