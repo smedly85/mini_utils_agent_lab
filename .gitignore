@@ -1,0 +1,33 @@
+# Python virtual environment
+.venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Pytest cache
+.pytest_cache/
+
+# Build output
+build/
+dist/
+*.o
+*.out
+
+# Coverage files
+.coverage
+htmlcov/
+
+# Environment and secret files
+.env
+.env.*
+
+# VS Code local settings
+.vscode/
+
+# macOS files
+.DS_Store
+
+# Temporary files
+*.tmp
+*.log
