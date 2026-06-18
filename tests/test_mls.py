@@ -57,20 +57,26 @@ class MlsTests(unittest.TestCase):
     def test_sorts_names_bytewise(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             directory = Path(temp_dir)
-            for name in ["b", "aa", ".hidden", "Z", "a", "A"]:
+            for name in ["b", "aa", ".hidden", "Z", "a", "0"]:
                 (directory / name).write_bytes(b"")
 
             result = self.run_mls([str(directory)])
 
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout, b".hidden\nA\nZ\na\naa\nb\n")
+        self.assertEqual(result.stdout, b".hidden\n0\nZ\na\naa\nb\n")
         self.assertEqual(result.stderr, b"")
 
     def test_sorts_case_sensitively(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             directory = Path(temp_dir)
-            (directory / "a").write_bytes(b"")
-            (directory / "A").write_bytes(b"")
+            (directory / "a").write_bytes(b"lower")
+            (directory / "A").write_bytes(b"upper")
+
+            created_names = {entry.name for entry in directory.iterdir()}
+            if created_names != {"A", "a"}:
+                self.skipTest(
+                    "filesystem does not support distinct case-sensitive names"
+                )
 
             result = self.run_mls([str(directory)])
 
