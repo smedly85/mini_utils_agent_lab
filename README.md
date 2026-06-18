@@ -1,44 +1,65 @@
 # Mini Utils Agent Lab
 
-This repository contains three intentionally small C/Linux-style utilities used as a controlled software-maintenance research project.
+This repository is a small public target repository for research on agentic software maintenance. It contains intentionally limited C utilities, public specifications, public tests, documentation, and public CI configuration.
 
-## Utilities
+The utilities are not intended to reproduce full GNU utility behavior.
 
-The planned utilities are:
+## Implemented Utilities
 
-* `msort`: line-oriented sorting;
-* `mcompress`: byte-oriented compression and decompression;
-* `mls`: limited directory listing.
+### `msort`
 
-These utilities are intentionally limited and are not intended to reproduce complete GNU Coreutils behavior.
+`msort` is a line-oriented sorting utility. It reads newline-delimited records from standard input or one file, sorts records in ascending bytewise lexicographic order, preserves duplicate and empty records, and handles a final record without a trailing newline.
 
-## Project Status
+### `mcompress`
 
-This repository is currently in its initialization stage. Utility implementations, tests, build tooling, and CI will be added incrementally.
+`mcompress` is a byte-oriented run-length compression utility. It supports `-c` / `--compress` and `-d` / `--decompress`, reads standard input or one file, and encodes each run as one count byte followed by one value byte. Valid counts are 1 through 255. Decompression rejects malformed compressed input.
 
-## Intended Build Interface
+### `mls`
 
-The intended build and test interface is:
+`mls` is a limited directory-listing utility. It lists the current directory or one supplied directory, lists only immediate entries, includes hidden names, excludes `.` and `..`, and sorts names in ascending bytewise order. It uses the narrow POSIX `<dirent.h>` interface and does not implement full system `ls` behavior.
 
-* `make`
-* `make test`
-* `make asan`
-* `make clean`
+## Build And Test
 
-Some commands may not be available until the corresponding infrastructure is implemented.
+The supported build and test commands are:
 
-## Platform and Language
+```text
+make
+make test
+make asan
+make clean
+```
 
-Utility code is written in C11. Narrowly scoped POSIX interfaces may be used where required. The initial execution targets are Linux and macOS.
+`make` builds all three release binaries. `make test` builds all required release binaries and runs the public tests. `make asan` builds AddressSanitizer and UndefinedBehaviorSanitizer versions. `make clean` removes generated build output.
 
-Python is used only for public tests and repository tooling. Python code must remain compatible with Python 3.9.6.
+Produced binaries:
 
-## Repository Boundaries
+```text
+build/msort
+build/mcompress
+build/mls
+build/msort_asan
+build/mcompress_asan
+build/mls_asan
+```
 
-This public repository contains source code, public specifications, public tests, contributor documentation, and public CI configuration.
+## Test Status
 
-Hidden tests, private agent prompts, credentials, trusted evaluator logic, and confidential experiment data are maintained outside this repository.
+The baseline contains 41 public behavioral tests:
 
-## Contribution Workflow
+* 10 for `msort`;
+* 16 for `mcompress`;
+* 15 for `mls`.
 
-After initialization, maintenance changes will normally begin with a GitHub issue and proceed through an issue-specific branch, pull request, automated checks, review, and a merge decision.
+One `mls` case-sensitivity test is skipped on filesystems that cannot represent `A` and `a` as distinct names, so not all 41 tests necessarily execute on every filesystem.
+
+## Compatibility And CI
+
+The utility code is C11 and is built with strict compiler warnings. Public test tooling is Python 3.9-compatible. The target environments are Linux and macOS.
+
+GitHub Actions runs on Ubuntu and macOS. CI builds the release binaries, runs the public tests, builds sanitizer binaries, and runs the public tests again against the sanitizer builds.
+
+## Public/Private Research Boundary
+
+This public repository may contain target source code, public tests, public specifications, documentation, and public CI.
+
+Trusted hidden tests, private agent prompts, controller code, credentials, evaluator answer keys, automatic merge credentials, and confidential experimental results belong outside this repository.
