@@ -1,4 +1,5 @@
 CC ?= cc
+PYTHON ?= python3
 
 BUILD_DIR := build
 MSORT_SRC := src/msort.c
@@ -8,11 +9,14 @@ MSORT_ASAN_BIN := $(BUILD_DIR)/msort_asan
 CFLAGS ?= -std=c11 -Wall -Wextra -Werror -pedantic -O2
 ASAN_CFLAGS ?= -std=c11 -Wall -Wextra -Werror -pedantic -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer
 
-.PHONY: all asan clean
+.PHONY: all asan test clean
 
 all: $(MSORT_BIN)
 
 asan: $(MSORT_ASAN_BIN)
+
+test: $(MSORT_BIN)
+	$(PYTHON) -m unittest discover -s tests -p "test_*.py" -v
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
