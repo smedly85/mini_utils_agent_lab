@@ -15,7 +15,7 @@ MLS_ASAN_BIN := $(BUILD_DIR)/mls_asan
 CFLAGS ?= -std=c11 -Wall -Wextra -Werror -pedantic -O2
 ASAN_CFLAGS ?= -std=c11 -Wall -Wextra -Werror -pedantic -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer
 
-.PHONY: all asan test clean
+.PHONY: all asan test issue-1-test issue-1-check clean
 
 all: $(MSORT_BIN) $(MCOMPRESS_BIN) $(MLS_BIN)
 
@@ -23,6 +23,11 @@ asan: $(MSORT_ASAN_BIN) $(MCOMPRESS_ASAN_BIN) $(MLS_ASAN_BIN)
 
 test: $(MSORT_BIN) $(MCOMPRESS_BIN) $(MLS_BIN)
 	$(PYTHON) -m unittest discover -s tests -p "test_*.py" -v
+
+issue-1-test: $(MSORT_BIN)
+	python3 -m unittest discover -s issue_tests -p "test_issue_001_*.py" -v
+
+issue-1-check: test issue-1-test
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
