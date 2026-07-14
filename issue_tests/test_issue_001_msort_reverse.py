@@ -147,6 +147,38 @@ class Issue001MsortReverseTests(unittest.TestCase):
 
         self.assert_usage_failure(result)
 
+    def test_rejects_repeated_short_reverse_option(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            Path(temp_dir, "-r").write_bytes(b"b\na\n")
+
+            result = self.run_msort(args=["-r", "-r"], cwd=temp_dir)
+
+        self.assert_usage_failure(result)
+
+    def test_rejects_short_then_long_reverse_option(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            Path(temp_dir, "--reverse").write_bytes(b"b\na\n")
+
+            result = self.run_msort(args=["-r", "--reverse"], cwd=temp_dir)
+
+        self.assert_usage_failure(result)
+
+    def test_rejects_long_then_short_reverse_option(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            Path(temp_dir, "-r").write_bytes(b"b\na\n")
+
+            result = self.run_msort(args=["--reverse", "-r"], cwd=temp_dir)
+
+        self.assert_usage_failure(result)
+
+    def test_rejects_repeated_long_reverse_option(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            Path(temp_dir, "--reverse").write_bytes(b"b\na\n")
+
+            result = self.run_msort(args=["--reverse", "--reverse"], cwd=temp_dir)
+
+        self.assert_usage_failure(result)
+
 
 if __name__ == "__main__":
     unittest.main()
