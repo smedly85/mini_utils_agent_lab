@@ -15,7 +15,9 @@ MLS_ASAN_BIN := $(BUILD_DIR)/mls_asan
 CFLAGS ?= -std=c11 -Wall -Wextra -Werror -pedantic -O2
 ASAN_CFLAGS ?= -std=c11 -Wall -Wextra -Werror -pedantic -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer
 
-.PHONY: all asan test issue-1-test issue-1-check clean
+.PHONY: all asan test issue-1-test issue-1-check issue-2-test issue-2-check \
+	issue-3-test issue-3-check issue-4-test issue-4-check issue-5-test \
+	issue-5-check clean
 
 all: $(MSORT_BIN) $(MCOMPRESS_BIN) $(MLS_BIN)
 
@@ -25,9 +27,29 @@ test: $(MSORT_BIN) $(MCOMPRESS_BIN) $(MLS_BIN)
 	$(PYTHON) -m unittest discover -s tests -p "test_*.py" -v
 
 issue-1-test: $(MSORT_BIN)
-	python3 -m unittest discover -s issue_tests -p "test_issue_001_*.py" -v
+	$(PYTHON) -m unittest discover -s issue_tests -p "test_issue_001_*.py" -v
 
 issue-1-check: test issue-1-test
+
+issue-2-test: $(MSORT_BIN)
+	$(PYTHON) -m unittest discover -s issue_tests -p "test_issue_002_*.py" -v
+
+issue-2-check: test issue-2-test
+
+issue-3-test: $(MSORT_BIN)
+	$(PYTHON) -m unittest discover -s issue_tests -p "test_issue_003_*.py" -v
+
+issue-3-check: test issue-3-test
+
+issue-4-test: $(MCOMPRESS_BIN)
+	$(PYTHON) -m unittest discover -s issue_tests -p "test_issue_004_*.py" -v
+
+issue-4-check: test issue-4-test
+
+issue-5-test: $(MCOMPRESS_BIN)
+	$(PYTHON) -m unittest discover -s issue_tests -p "test_issue_005_*.py" -v
+
+issue-5-check: test issue-5-test
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
