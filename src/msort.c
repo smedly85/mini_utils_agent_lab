@@ -30,7 +30,7 @@ typedef enum {
 
 static void print_usage(void)
 {
-    fprintf(stderr, "usage: msort [path]\n");
+    fprintf(stderr, "usage: msort [-r | --reverse] [path]\n");
 }
 
 static int grow_byte_buffer(unsigned char **buffer, size_t *capacity, size_t required)
@@ -184,6 +184,11 @@ static int compare_records(const void *left, const void *right)
     return 0;
 }
 
+static int compare_records_reverse(const void *left, const void *right)
+{
+    return compare_records(right, left);
+}
+
 static int read_all_records(FILE *input, RecordList *records)
 {
     ReadResult result;
@@ -239,14 +244,34 @@ int main(int argc, char **argv)
     FILE *input = stdin;
     RecordList records = {NULL, 0, 0};
     int read_status;
+    int reverse = 0;
+    int arg_index = 1;
 
-    if (argc > 2) {
+    if (argc > 3) {
         print_usage();
         return EXIT_FAILURE;
     }
 
-    if (argc == 2) {
-        path = argv[1];
+    if (arg_index < argc && (strcmp(argv[arg_index], "-r") == 0 || strcmp(argv[arg_index], "--reverse") == 0)) {
+        reverse = 1;
+        arg_index++;
+    }
+
+    if (arg_index < argc) {
+        if (argv[arg_index][0] == '-') {
+            print_usage();
+            return EXIT_FAILURE;
+        }
+        path = argv[arg_index];
+        arg_index++;
+    }
+
+    if (arg_index < argc) {
+        print_usage();
+        return EXIT_FAILURE;
+    }
+
+    if (path != NULL) {
         input = fopen(path, "rb");
         if (input == NULL) {
             fprintf(stderr, "msort: cannot open '%s': %s\n", path, strerror(errno));
@@ -281,7 +306,11 @@ int main(int argc, char **argv)
     }
 
     if (records.count > 1) {
-        qsort(records.items, records.count, sizeof(records.items[0]), compare_records);
+        if (reverse) {
+            qsort(records.items, records.count, sizeof(records.items[0]), compare_records_reverse);
+        } else {
+            qsort(records.items, records.count, sizeof(records.items[0]), compare_records);
+        }
     }
 
     if (write_records(&records) != 0) {

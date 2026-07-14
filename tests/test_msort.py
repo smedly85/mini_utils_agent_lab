@@ -107,6 +107,84 @@ class MsortTests(unittest.TestCase):
         self.assertEqual(result.stdout, b"1\n10\n2\n")
         self.assertEqual(result.stderr, b"")
 
+    def test_reverse_short_option_sorts_standard_input(self):
+        result = self.run_msort(b"banana\napple\ncherry\n", args=["-r"])
+
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, b"cherry\nbanana\napple\n")
+        self.assertEqual(result.stderr, b"")
+
+    def test_reverse_long_option_sorts_standard_input(self):
+        result = self.run_msort(b"banana\napple\ncherry\n", args=["--reverse"])
+
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, b"cherry\nbanana\napple\n")
+        self.assertEqual(result.stderr, b"")
+
+    def test_reverse_sorts_one_file(self):
+        with tempfile.NamedTemporaryFile(delete=True) as temp_file:
+            temp_file.write(b"pear\napple\norange\n")
+            temp_file.flush()
+
+            result = self.run_msort(args=["-r", temp_file.name])
+
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, b"pear\norange\napple\n")
+        self.assertEqual(result.stderr, b"")
+
+    def test_reverse_preserves_duplicate_records(self):
+        result = self.run_msort(b"beta\nalpha\nbeta\nalpha\n", args=["-r"])
+
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, b"beta\nbeta\nalpha\nalpha\n")
+        self.assertEqual(result.stderr, b"")
+
+    def test_reverse_preserves_empty_records(self):
+        result = self.run_msort(b"b\n\na\n", args=["-r"])
+
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, b"b\na\n\n")
+        self.assertEqual(result.stderr, b"")
+
+    def test_reverse_handles_input_without_final_newline(self):
+        result = self.run_msort(b"delta\nalpha\ncharlie", args=["-r"])
+
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, b"delta\ncharlie\nalpha\n")
+        self.assertEqual(result.stderr, b"")
+
+    def test_reverse_handles_empty_input(self):
+        result = self.run_msort(b"", args=["-r"])
+
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, b"")
+        self.assertEqual(result.stderr, b"")
+
+    def test_rejects_unknown_short_option(self):
+        result = self.run_msort(args=["-x"])
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, b"")
+        self.assertIn(b"usage:", result.stderr)
+
+    def test_rejects_unknown_long_option(self):
+        result = self.run_msort(args=["--unknown"])
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, b"")
+        self.assertIn(b"usage:", result.stderr)
+
+    def test_rejects_path_followed_by_reverse_option(self):
+        with tempfile.NamedTemporaryFile(delete=True) as temp_file:
+            temp_file.write(b"b\na\n")
+            temp_file.flush()
+
+            result = self.run_msort(args=[temp_file.name, "-r"])
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, b"")
+        self.assertIn(b"usage:", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()
